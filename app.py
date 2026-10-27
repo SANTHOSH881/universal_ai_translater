@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -36,6 +37,7 @@ def translate(payload: TranslateRequest):
             raise ValueError("The translation service returned an empty result.")
         return {"translatedText": translated, "source": source, "target": target}
     except Exception as exc:
+        logging.exception("Translation provider failed")
         # Keep provider details out of the response; they may contain implementation information.
         raise HTTPException(
             status_code=502,
