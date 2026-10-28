@@ -223,7 +223,6 @@ $("gestureResult").textContent = stabilizeGesture(rawGesture);
 $("cameraChip").textContent =
   `${hands.length} hand${hands.length === 1 ? "" : "s"} tracked`;
 
-const links = visionModule.HandLandmarker.HAND_CONNECTIONS;
 
   const links = visionModule.HandLandmarker.HAND_CONNECTIONS;
   hands.forEach(points=>{
