@@ -91,16 +91,35 @@ async function setupLandmarker(){
   return landmarker;
 }
 function genericPose(points){
-  if(!points||points.length<21)return "Hand detected";
-  // Finger extension heuristic only. These are generic visual descriptions, not sign labels.
-  const tips=[8,12,16,20], mids=[6,10,14,18];
-  const extended=tips.map((tip,i)=>points[tip].y<points[mids[i]].y).filter(Boolean).length;
-  const thumbOpen=Math.abs(points[4].x-points[2].x)>.08;
-  if(extended>=4&&thumbOpen)return "Open-hand pose detected";
-  if(extended===0&&!thumbOpen)return "Closed-hand pose detected";
-  if(extended===1)return "One-finger pose detected";
-  return "Hand pose detected";
+
+function genericPose(points) {
+  if (!points || points.length < 21) return "Hand detected";
+
+  const tips = [8, 12, 16, 20];
+  const mids = [6, 10, 14, 18];
+
+  const extended = tips.map((tip, i) =>
+    points[tip].y < points[mids[i]].y
+  );
+
+  const count = extended.filter(Boolean).length;
+  const thumbOpen = Math.abs(points[4].x - points[2].x) > 0.08;
+
+  if (count >= 4 && thumbOpen) {
+    return 'HELLO (open-palm demo gesture)';
+  }
+
+  if (count === 0 && !thumbOpen) {
+    return 'YES (closed-fist demo gesture)';
+  }
+
+  if (count === 1 && extended[0]) {
+    return 'NO (one-finger demo gesture)';
+  }
+
+  return 'Gesture not recognized';
 }
+
 function drawResults(result){
   const w=video.videoWidth,h=video.videoHeight;if(!w||!h)return;
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
