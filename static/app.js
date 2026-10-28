@@ -81,15 +81,47 @@ $("listenBtn").addEventListener("click",()=>{
 
 // Camera + MediaPipe hand landmarks: generic pose demo only, not ISL recognition.
 const video=$("cameraVideo"), canvas=$("cameraCanvas"), ctx=canvas.getContext("2d");
-let cameraStream=null, landmarker=null, cameraLoop=null, lastVideoTime=-1;
-const cameraStage=document.querySelector(".camera-stage");
-async function setupLandmarker(){
-  if(landmarker)return landmarker;
-  if(!window.FilesetResolver||!window.HandLandmarker)throw new Error("Hand-tracking library did not load. Check your internet connection and refresh.");
-  const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
-  landmarker=await HandLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",delegate:"GPU"},runningMode:"VIDEO",numHands:2});
-  return landmarker;
+let cameraStream = null;
+let landmarker = null;
+let visionModule = null;
+let cameraLoop = null;
+let lastVideoTime = -1;
+const cameraStage = document.querySelector(".camera-stage");
+
+async function setupLandmarker() {
+  if (landmarker) return landmarker;
+
+  try {
+    visionModule = await import(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
+    );
+
+    const vision = await visionModule.FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    landmarker = await visionModule.HandLandmarker.createFromOptions(
+      vision,
+      {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+          delegate: "CPU"
+        },
+        runningMode: "VIDEO",
+        numHands: 2
+      }
+    );
+
+    return landmarker;
+  } catch (error) {
+    console.error("MediaPipe loading failed:", error);
+    throw new Error(
+      "Could not load hand tracking. Check the browser console and internet connection."
+    );
+  }
 }
+
 function genericPose(points){
 
 function genericPose(points) {
@@ -128,7 +160,7 @@ function drawResults(result){
   if(!hands.length){$("gestureResult").textContent="No hand detected yet";$("cameraChip").textContent="Searching for hands…";return;}
   $("gestureResult").textContent=hands.map(genericPose).join(" · ");
   $("cameraChip").textContent=`${hands.length} hand${hands.length===1?"":"s"} tracked`;
-  const links=HandLandmarker.HAND_CONNECTIONS;
+  const links = visionModule.HandLandmarker.HAND_CONNECTIONS;
   hands.forEach(points=>{
     ctx.lineWidth=3;ctx.strokeStyle="#6fe3d0";ctx.fillStyle="#b6aaff";
     links.forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(points[a].x*w,points[a].y*h);ctx.lineTo(points[b].x*w,points[b].y*h);ctx.stroke();});
