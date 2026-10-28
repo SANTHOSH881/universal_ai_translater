@@ -61,25 +61,37 @@ def translate_google(text, source, target):
 
     return result
 
-
 def translate_mymemory(text, source, target):
-    # MyMemory uses a specific source language, not "auto".
-    if source == "auto" or len(text) > 450:
-        raise ValueError("MyMemory fallback unavailable for this request.")
+    if len(text.encode("utf-8")) > 450:
+        raise ValueError("Text is too long for MyMemory fallback.")
+
+    params = {
+        "q": text,
+        "langpair": f"{source}|{target}",
+    }
+
+    # MyMemory requires an explicit source language.
+    if source == "auto":
+        detect_response = requests.post(
+            "https://ws.detectlanguage.com/0.2/detect",
+            json={"q": text},
+            timeout=10,
+        )
+        detect_response.raise_for_status()
+        raise ValueError(
+            "Automatic source-language detection needs a configured API key."
+        )
 
     response = requests.get(
         "https://api.mymemory.translated.net/get",
-        params={
-            "q": text,
-            "langpair": f"{source}|{target}",
-        },
+        params=params,
         timeout=15,
     )
     response.raise_for_status()
-    data = response.json()
 
+    data = response.json()
     if data.get("responseStatus") != 200:
-        raise ValueError("MyMemory rejected the request.")
+        raise ValueError(data.get("responseDetails", "MyMemory failed."))
 
     result = html.unescape(
         data.get("responseData", {}).get("translatedText", "")
@@ -89,7 +101,6 @@ def translate_mymemory(text, source, target):
         raise ValueError("MyMemory returned an empty translation.")
 
     return result
-
 
 @app.get("/api/health")
 def health():
