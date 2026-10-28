@@ -86,6 +86,11 @@ let landmarker = null;
 let visionModule = null;
 let cameraLoop = null;
 let lastVideoTime = -1;
+let stableGesture = "No hand detected yet";
+let candidateGesture = "";
+let candidateFrames = 0;
+
+const REQUIRED_STABLE_FRAMES = 5;
 const cameraStage = document.querySelector(".camera-stage");
 
 async function setupLandmarker() {
@@ -178,15 +183,48 @@ function genericPose(points) {
   return "Unknown gesture";
 }
 
+function stabilizeGesture(rawGesture) {
+  if (rawGesture !== candidateGesture) {
+    candidateGesture = rawGesture;
+    candidateFrames = 1;
+  } else {
+    candidateFrames++;
+  }
+
+  if (candidateFrames >= REQUIRED_STABLE_FRAMES) {
+    stableGesture = candidateGesture;
+  }
+
+  return stableGesture;
+}
+
+
 
 function drawResults(result){
   const w=video.videoWidth,h=video.videoHeight;if(!w||!h)return;
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   ctx.clearRect(0,0,w,h);
-  const hands=result.landmarks||[];
-  if(!hands.length){$("gestureResult").textContent="No hand detected yet";$("cameraChip").textContent="Searching for hands…";return;}
-  $("gestureResult").textContent=hands.map(genericPose).join(" · ");
-  $("cameraChip").textContent=`${hands.length} hand${hands.length===1?"":"s"} tracked`;
+  
+const hands = result.landmarks || [];
+
+if (!hands.length) {
+  candidateGesture = "";
+  candidateFrames = 0;
+  stableGesture = "No hand detected yet";
+
+  $("gestureResult").textContent = stableGesture;
+  $("cameraChip").textContent = "Searching for hands…";
+  return;
+}
+
+const rawGesture = hands.map(genericPose).join(" · ");
+$("gestureResult").textContent = stabilizeGesture(rawGesture);
+
+$("cameraChip").textContent =
+  `${hands.length} hand${hands.length === 1 ? "" : "s"} tracked`;
+
+const links = visionModule.HandLandmarker.HAND_CONNECTIONS;
+
   const links = visionModule.HandLandmarker.HAND_CONNECTIONS;
   hands.forEach(points=>{
     ctx.lineWidth=3;ctx.strokeStyle="#6fe3d0";ctx.fillStyle="#b6aaff";
