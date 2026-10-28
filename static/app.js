@@ -153,11 +153,12 @@ function genericPose(points) {
 
   // Four fingers folded, thumb pointing upward
   if (
-    extendedCount === 0 &&
-    points[4].y < points[3].y
-  ) {
-    return "THUMBS UP";
-  }
+     extendedCount === 0 &&
+     thumbUp &&
+     points[4].y < points[3].y
+  )  {
+     return "THUMBS UP";
+   }
 
   // Index finger extended, remaining fingers folded
   if (
@@ -170,9 +171,9 @@ function genericPose(points) {
   }
 
   // All fingers folded
-  if (extendedCount === 0 && !thumbUp) {
-    return "FIST";
-  }
+  if (extendedCount === 0) {
+     return "FIST";
+   }
 
   return "Unknown gesture";
 }
