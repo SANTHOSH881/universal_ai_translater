@@ -58,10 +58,11 @@ def split_text(text, max_bytes=450):
 
 
 def translate_chunk(text, source, target):
-    params = urlencode({
-        "q": text,
-        "langpair": f"{source}|{target}"
-    })
+ params = urlencode({
+    "q": text,
+    "langpair": f"{source}|{target}",
+    "de": "santhoshtejavath8888@gmail.com"
+})
     url = f"https://api.mymemory.translated.net/get?{params}"
 
     request = Request(
