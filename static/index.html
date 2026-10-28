@@ -4,107 +4,168 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101426">
-  <meta name="description" content="A multilingual voice and text translation prototype with an experimental sign-language research lab.">
-  <title>LinguaBridge — Say it. Share it.</title>
+  <meta name="description" content="An interactive hand gesture recognition and gesture-to-text prototype.">
+  <title>LinguaBridge — Hand Gesture Demo</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
   <header class="topbar">
-    <a class="brand" href="#" aria-label="LinguaBridge home"><span class="brand-mark"><span></span><span></span><span></span></span><span>lingua<span class="brand-light">bridge</span></span></a>
-    <nav class="top-nav"><a href="#translator" class="nav-active">Translator</a><a href="#sign-lab">Sign lab <span class="beta">EXPERIMENTAL</span></a></nav>
-    <div class="top-right"><span class="status-dot"></span><span>Prototype</span></div>
+    <a class="brand" href="#" aria-label="LinguaBridge home">
+      <span class="brand-mark"><span></span><span></span><span></span></span>
+      <span>lingua<span class="brand-light">bridge</span></span>
+    </a>
+
+    <nav class="top-nav">
+      <a href="#sign-lab" class="nav-active">Gesture demo</a>
+    </nav>
+
+    <div class="top-right">
+      <span class="status-dot"></span>
+      <span>Live prototype</span>
+    </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="eyebrow"><span class="sparkle">✦</span> COMMUNICATION WITHOUT BORDERS</div>
-      <h1>Every voice has a place.<br><span>Every message matters.</span></h1>
-      <p class="hero-copy">Translate conversations across languages with speech, text, and an experimental sign-language workspace.</p>
-      <div class="hero-pills"><span>◉ Voice input</span><span>↔ 100+ language options</span><span>⌁ Accessibility-minded</span></div>
-    </section>
+      <div class="eyebrow">
+        <span class="sparkle">✦</span>
+        AI-POWERED HAND GESTURE DEMO
+      </div>
 
-    <section id="translator" class="translator-card glass">
-      <div class="card-heading">
-        <div><div class="section-kicker">01 / VOICE & TEXT</div><h2>Make yourself understood</h2></div>
-        <div class="secure-note"><span class="tiny-lock">◈</span> You control when to listen</div>
-      </div>
-      <div class="language-row">
-        <label class="language-select"><span>FROM</span><select id="sourceLang" aria-label="Source language"></select></label>
-        <button id="swapBtn" class="swap-btn" title="Swap languages" aria-label="Swap languages">⇄</button>
-        <label class="language-select"><span>TRANSLATE TO</span><select id="targetLang" aria-label="Target language"></select></label>
-      </div>
-      <div class="work-area">
-        <div class="text-panel">
-          <div class="panel-top"><span class="panel-label">YOUR MESSAGE</span><span id="sourceBadge" class="language-badge">Auto detect</span></div>
-          <textarea id="sourceText" maxlength="5000" placeholder="Type something, or use the microphone to speak..." aria-label="Text to translate"></textarea>
-          <div class="panel-bottom">
-            <div class="input-actions"><button id="listenBtn" class="mic-button"><span class="mic-icon">🎙</span><span id="listenLabel">Start listening</span></button><button id="clearBtn" class="icon-button" title="Clear text" aria-label="Clear text">⌫</button></div>
-            <span id="charCount" class="char-count">0 / 5000</span>
-          </div>
-          <p id="speechStatus" class="inline-status" aria-live="polite">Microphone is off.</p>
-        </div>
-        <div class="text-panel result-panel">
-          <div class="panel-top"><span class="panel-label">TRANSLATION</span><span id="targetBadge" class="language-badge">English</span></div>
-          <div id="resultText" class="result-text" aria-live="polite">Your translated message will appear here.</div>
-          <div class="panel-bottom result-bottom">
-            <div class="input-actions"><button id="speakBtn" class="secondary-button" disabled>▶ <span>Listen</span></button><button id="copyBtn" class="icon-button" title="Copy translation" aria-label="Copy translation">▢</button></div>
-            <span id="resultMeta" class="char-count">Ready when you are</span>
-          </div>
-        </div>
-      </div>
-      <div class="translate-footer"><div class="privacy-hint"><span>✦</span> Review recognized text before sharing important messages.</div><button id="translateBtn" class="primary-button"><span>Translate message</span><span>↗</span></button></div>
-      <p id="translateStatus" class="notice" role="status"></p>
-    </section>
+      <h1>Communication goes<br><span>beyond words.</span></h1>
 
-    <section class="how-strip">
-      <div><span class="step-number">01</span><div><strong>Speak naturally</strong><p>Use your voice or type your message.</p></div></div>
-      <div><span class="step-number">02</span><div><strong>Choose a language</strong><p>Pick the language you need.</p></div></div>
-      <div><span class="step-number">03</span><div><strong>Share the meaning</strong><p>Read, copy, or play the translation.</p></div></div>
+      <p class="hero-copy">
+        Explore real-time hand tracking, recognize simple hand poses,
+        and turn recognized gestures into text and speech.
+      </p>
+
+      <div class="hero-pills">
+        <span>◉ Live camera</span>
+        <span>⌁ Hand gesture recognition</span>
+        <span>✦ Text and speech output</span>
+      </div>
     </section>
 
     <section id="sign-lab" class="sign-section">
-      <div class="sign-intro"><div class="section-kicker">02 / ACCESSIBILITY RESEARCH</div><h2>Communication goes beyond words.</h2><p>Explore the webcam hand-tracking foundation for a future Indian Sign Language (ISL) experience.</p></div>
+      <div class="sign-intro">
+        <div class="section-kicker">01 / INTERACTIVE DEMO</div>
+        <h2>Your hands can tell a story.</h2>
+        <p>
+          Enable your webcam to track hand landmarks. Hold a recognized
+          pose, add its label to your sentence, and copy or speak the result.
+        </p>
+      </div>
+
       <div class="sign-grid">
         <div class="camera-card glass">
-          <div class="camera-header"><div><span class="live-indicator"></span><strong>Hand tracking studio</strong></div><span class="beta">EARLY DEMO</span></div>
+          <div class="camera-header">
+            <div>
+              <span class="live-indicator"></span>
+              <strong>Hand tracking studio</strong>
+            </div>
+            <span class="beta">LIVE DEMO</span>
+          </div>
+
           <div class="camera-stage">
             <video id="cameraVideo" autoplay playsinline muted></video>
             <canvas id="cameraCanvas"></canvas>
-            <div id="cameraPlaceholder" class="camera-placeholder"><div class="camera-symbol">⌁</div><strong>Your camera preview lives here</strong><span>Allow camera access to begin hand tracking.</span></div>
+
+            <div id="cameraPlaceholder" class="camera-placeholder">
+              <div class="camera-symbol">⌁</div>
+              <strong>Your camera preview lives here</strong>
+              <span>Allow camera access to begin hand tracking.</span>
+            </div>
+
             <div id="cameraChip" class="camera-chip">Camera off</div>
           </div>
-          <div class="camera-controls"><button id="cameraBtn" class="primary-button"><span>Enable camera</span><span>↗</span></button><button id="cameraStopBtn" class="secondary-button" disabled>Stop camera</button></div>
-          <p id="cameraStatus" class="inline-status" aria-live="polite">Camera is off. Video processing runs in this browser.</p>
+
+          <div class="camera-controls">
+            <button id="cameraBtn" class="primary-button" type="button">
+              <span>Enable camera</span><span>↗</span>
+            </button>
+            <button id="cameraStopBtn" class="secondary-button" type="button" disabled>
+              Stop camera
+            </button>
+          </div>
+
+          <p id="cameraStatus" class="inline-status" aria-live="polite">
+            Camera is off. Video processing runs in this browser.
+          </p>
         </div>
+
         <div class="sign-info-card">
-          <div class="section-kicker">WHAT THIS DEMO CAN DO</div>
-          <h3>Landmarks first.<br><span>Meaning with care.</span></h3>
+          <div class="section-kicker">GESTURE RECOGNITION</div>
 
-<p id="gestureResult" class="gesture-result">No hand detected yet</p>
+          <h3>Landmarks first.<br><span>Text comes next.</span></h3>
 
-<div class="gesture-text-panel">
-  <h4>Gesture-to-Text</h4>
-  <p id="gestureSentence" aria-live="polite">Your sentence will appear here.</p>
+          <p class="panel-label">CURRENT DETECTION</p>
+          <p id="gestureResult" class="gesture-result" aria-live="polite">
+            No hand detected yet
+          </p>
 
-  <div class="gesture-text-actions">
-    <button id="speakGestureBtn" type="button">Speak text</button>
-    <button id="addGestureBtn" type="button">Add gesture</button>
-    <button id="copyGestureBtn" type="button">Copy text</button>
-    <button id="clearGestureBtn" type="button">Clear</button>
-  </div>
-</div>
-          <p class="sign-disclaimer">The model tracks hand landmarks and may show a generic pose such as an open palm or fist. These labels are <strong>not ISL translations</strong>.</p>
-          <div class="next-steps"><strong>To build real ISL translation</strong><ul><li>Work with fluent ISL signers and Deaf community partners.</li><li>Collect consented videos and annotate full sign sequences.</li><li>Train and validate a temporal model, including movement and facial cues.</li></ul></div>
+          <div class="gesture-text-panel">
+            <h4>Gesture-to-Text</h4>
+
+            <p id="gestureSentence" aria-live="polite">
+              Your sentence will appear here.
+            </p>
+
+            <div class="gesture-text-actions">
+              <button id="addGestureBtn" type="button">Add gesture</button>
+              <button id="copyGestureBtn" type="button">Copy text</button>
+              <button id="clearGestureBtn" type="button">Clear</button>
+              <button id="speakGestureBtn" type="button">Speak text</button>
+            </div>
+          </div>
+
+          <div class="next-steps">
+            <strong>Available demo gestures</strong>
+            <ul>
+              <li>Open palm — HELLO</li>
+              <li>One raised finger — ONE</li>
+              <li>Closed fist — FIST</li>
+              <li>Thumbs-up pose — THUMBS UP</li>
+            </ul>
+          </div>
+
+          <p class="sign-disclaimer">
+            <strong>Prototype limitation:</strong> this demo uses hand landmarks
+            and simple pose rules. These labels are not official Indian Sign
+            Language (ISL) translations and should not be used as a substitute
+            for a real sign-language interpreter.
+          </p>
         </div>
       </div>
     </section>
-    <section class="bottom-note"><span class="note-icon">✦</span><p><strong>Built for connection, designed to keep learning.</strong><br>This is a prototype. Speech recognition and translation quality vary by browser, language, accent, and network. Do not rely on it for emergencies or high-stakes decisions.</p></section>
+
+    <section class="bottom-note">
+      <span class="note-icon">✦</span>
+      <p>
+        <strong>Built for accessible communication research.</strong><br>
+        This prototype demonstrates browser-based hand tracking,
+        simple gesture classification, and text-to-speech output.
+        Camera access requires your permission.
+      </p>
+    </section>
   </main>
-  <footer><a class="brand footer-brand" href="#"><span class="brand-mark"><span></span><span></span><span></span></span><span>lingua<span class="brand-light">bridge</span></span></a><span>Different languages. Shared understanding.</span><span>© 2026 LinguaBridge prototype</span></footer>
+
+  <footer>
+    <a class="brand footer-brand" href="#">
+      <span class="brand-mark"><span></span><span></span><span></span></span>
+      <span>lingua<span class="brand-light">bridge</span></span>
+    </a>
+    <span>Different gestures. Shared understanding.</span>
+    <span>© 2026 LinguaBridge prototype</span>
+  </footer>
+
   <script src="/static/app.js"></script>
 </body>
 </html>
