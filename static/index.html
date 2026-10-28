@@ -83,7 +83,19 @@
         <div class="sign-info-card">
           <div class="section-kicker">WHAT THIS DEMO CAN DO</div>
           <h3>Landmarks first.<br><span>Meaning with care.</span></h3>
-          <p id="gestureResult" class="gesture-result">No hand detected yet</p>
+
+<p id="gestureResult" class="gesture-result">No hand detected yet</p>
+
+<div class="gesture-text-panel">
+  <h4>Gesture-to-Text</h4>
+  <p id="gestureSentence" aria-live="polite">Your sentence will appear here.</p>
+
+  <div class="gesture-text-actions">
+    <button id="addGestureBtn" type="button">Add gesture</button>
+    <button id="copyGestureBtn" type="button">Copy text</button>
+    <button id="clearGestureBtn" type="button">Clear</button>
+  </div>
+</div>
           <p class="sign-disclaimer">The model tracks hand landmarks and may show a generic pose such as an open palm or fist. These labels are <strong>not ISL translations</strong>.</p>
           <div class="next-steps"><strong>To build real ISL translation</strong><ul><li>Work with fluent ISL signers and Deaf community partners.</li><li>Collect consented videos and annotate full sign sequences.</li><li>Train and validate a temporal model, including movement and facial cues.</li></ul></div>
         </div>
