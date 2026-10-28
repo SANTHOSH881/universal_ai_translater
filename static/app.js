@@ -299,5 +299,30 @@ $("copyGestureBtn").addEventListener("click", async () => {
   }
 });
 
+$("speakGestureBtn").addEventListener("click", () => {
+  const text = gestureWords.join(" ").trim();
+
+  if (!text) {
+    $("gestureSentence").textContent =
+      "Add a gesture before speaking.";
+    return;
+  }
+
+  if (!("speechSynthesis" in window)) {
+    $("gestureSentence").textContent =
+      "Speech synthesis is not supported in this browser.";
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.9;
+
+  window.speechSynthesis.speak(utterance);
+});
+
+
 window.addEventListener("beforeunload",()=>{stopListening();if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());if(landmarker)landmarker.close();});
 updateBadges();
