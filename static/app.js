@@ -122,7 +122,7 @@ async function setupLandmarker() {
   }
 }
 
-function genericPose(points){
+
 
 function genericPose(points) {
   if (!points || points.length < 21) return "Hand detected";
