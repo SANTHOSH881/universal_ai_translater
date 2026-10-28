@@ -260,5 +260,44 @@ $("cameraStopBtn").addEventListener("click",()=>{
   ctx.clearRect(0,0,canvas.width,canvas.height);cameraStage.classList.remove("active");$("cameraPlaceholder").hidden=false;
   $("cameraStopBtn").disabled=true;$("cameraChip").textContent="Camera off";$("cameraStatus").textContent="Camera is off. Video processing runs in this browser.";$("gestureResult").textContent="No hand detected yet";
 });
+
+let gestureWords = [];
+
+$("addGestureBtn").addEventListener("click", () => {
+  const gesture = $("gestureResult").textContent.trim();
+
+  const allowedGestures = ["HELLO", "FIST", "ONE", "THUMBS UP"];
+
+  if (!allowedGestures.includes(gesture)) {
+    $("gestureSentence").textContent =
+      "Hold a recognized gesture before adding it.";
+    return;
+  }
+
+  gestureWords.push(gesture);
+  $("gestureSentence").textContent = gestureWords.join(" ");
+});
+
+$("clearGestureBtn").addEventListener("click", () => {
+  gestureWords = [];
+  $("gestureSentence").textContent = "Your sentence will appear here.";
+});
+
+$("copyGestureBtn").addEventListener("click", async () => {
+  if (gestureWords.length === 0) {
+    $("gestureSentence").textContent = "There is no text to copy yet.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(gestureWords.join(" "));
+    $("gestureSentence").textContent =
+      gestureWords.join(" ") + " (Copied!)";
+  } catch (error) {
+    $("gestureSentence").textContent =
+      "Copy failed. Please select and copy the text manually.";
+  }
+});
+
 window.addEventListener("beforeunload",()=>{stopListening();if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());if(landmarker)landmarker.close();});
 updateBadges();
