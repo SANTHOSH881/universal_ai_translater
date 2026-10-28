@@ -62,45 +62,36 @@ def translate_google(text, source, target):
     return result
 
 def translate_mymemory(text, source, target):
-    if len(text.encode("utf-8")) > 450:
-        raise ValueError("Text is too long for MyMemory fallback.")
-
-    params = {
-        "q": text,
-        "langpair": f"{source}|{target}",
-    }
-
-    # MyMemory requires an explicit source language.
     if source == "auto":
-        detect_response = requests.post(
-            "https://ws.detectlanguage.com/0.2/detect",
-            json={"q": text},
-            timeout=10,
-        )
-        detect_response.raise_for_status()
         raise ValueError(
-            "Automatic source-language detection needs a configured API key."
+            "Please select the source language instead of Auto Detect."
         )
 
     response = requests.get(
         "https://api.mymemory.translated.net/get",
-        params=params,
+        params={
+            "q": text,
+            "langpair": f"{source}|{target}",
+        },
         timeout=15,
     )
     response.raise_for_status()
 
     data = response.json()
-    if data.get("responseStatus") != 200:
-        raise ValueError(data.get("responseDetails", "MyMemory failed."))
 
-    result = html.unescape(
+    if data.get("responseStatus") != 200:
+        raise ValueError(
+            data.get("responseDetails", "MyMemory translation failed.")
+        )
+
+    translated = html.unescape(
         data.get("responseData", {}).get("translatedText", "")
     ).strip()
 
-    if not result:
-        raise ValueError("MyMemory returned an empty translation.")
+    if not translated:
+        raise ValueError("MyMemory returned no translation.")
 
-    return result
+    return translated
 
 @app.get("/api/health")
 def health():
@@ -130,10 +121,8 @@ def translate(payload: TranslateRequest):
         }
 
     providers = [
-        ("LibreTranslate", translate_libre),
-        ("Google Translate", translate_google),
-        ("MyMemory", translate_mymemory),
-    ]
+       ("MyMemory", translate_mymemory),
+      ]
 
     errors = []
 
