@@ -57,12 +57,36 @@ def split_text(text, max_bytes=450):
     return chunks
 
 
+
 def translate_chunk(text, source, target):
- params = urlencode({
-    "q": text,
-    "langpair": f"{source}|{target}",
-    "de": "santhoshtejavath8888@gmail.com"
-})
+    api_url = "https://translate.argosopentech.com/translate"
+
+    payload = json.dumps({
+        "q": text,
+        "source": source,
+        "target": target,
+        "format": "text"
+    }).encode("utf-8")
+
+    request = Request(
+        api_url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    with urlopen(request, timeout=30) as response:
+        data = json.loads(response.read().decode("utf-8"))
+
+    translated = data.get("translatedText")
+
+    if not translated:
+        raise ValueError(
+            f"Translation provider returned an unexpected response: {data}"
+        )
+
+    return translated
+
     url = f"https://api.mymemory.translated.net/get?{params}"
 
     request = Request(
