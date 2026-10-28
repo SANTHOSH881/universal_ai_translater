@@ -1,21 +1,27 @@
 
 from pathlib import Path
 import html
-import json
 import logging
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+import os
 
+import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
+from deep_translator import GoogleTranslator
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="LinguaBridge Translator", version="1.1.0")
+app = FastAPI(title="Universal AI Translator", version="1.1.0")
+logging.basicConfig(level=logging.INFO)
+
+# Community LibreTranslate instance; availability may vary.
+LIBRETRANSLATE_URL = os.getenv(
+    "LIBRETRANSLATE_URL",
+    "https://translate.flossboxin.org.in/translate",
+)
 
 
 class TranslateRequest(BaseModel):
@@ -24,137 +30,125 @@ class TranslateRequest(BaseModel):
     target: str = Field(default="en", max_length=20)
 
 
-def split_text(text, max_bytes=450):
-    """Split text into chunks below MyMemory's request-size limit."""
-    chunks = []
-    current = ""
-
-    for word in text.split():
-        candidate = f"{current} {word}".strip()
-
-        if len(candidate.encode("utf-8")) <= max_bytes:
-            current = candidate
-            continue
-
-        if current:
-            chunks.append(current)
-            current = ""
-
-        # Handle an unusually long word without exceeding the byte limit.
-        part = ""
-        for char in word:
-            if len((part + char).encode("utf-8")) > max_bytes:
-                chunks.append(part)
-                part = char
-            else:
-                part += char
-
-        current = part
-
-    if current:
-        chunks.append(current)
-
-    return chunks
-
-
-
-def translate_chunk(text, source, target):
-    api_url = "https://translate.argosopentech.com/translate"
-
-    payload = json.dumps({
-        "q": text,
-        "source": source,
-        "target": target,
-        "format": "text"
-    }).encode("utf-8")
-
-    request = Request(
-        api_url,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST"
+def translate_libre(text, source, target):
+    response = requests.post(
+        LIBRETRANSLATE_URL,
+        json={
+            "q": text,
+            "source": source,
+            "target": target,
+            "format": "text",
+        },
+        timeout=15,
     )
+    response.raise_for_status()
+    result = response.json().get("translatedText", "").strip()
 
-    with urlopen(request, timeout=30) as response:
-        data = json.loads(response.read().decode("utf-8"))
+    if not result:
+        raise ValueError("LibreTranslate returned an empty translation.")
 
-    translated = data.get("translatedText")
+    return result
 
-    if not translated:
-        raise ValueError(
-            f"Translation provider returned an unexpected response: {data}"
-        )
 
-    return translated
+def translate_google(text, source, target):
+    result = GoogleTranslator(
+        source=source,
+        target=target,
+    ).translate(text)
 
-    url = f"https://api.mymemory.translated.net/get?{params}"
+    if not result:
+        raise ValueError("Google returned an empty translation.")
 
-    request = Request(
-        url,
-        headers={"User-Agent": "UniversalAITranslator/1.0"}
+    return result
+
+
+def translate_mymemory(text, source, target):
+    # MyMemory uses a specific source language, not "auto".
+    if source == "auto" or len(text) > 450:
+        raise ValueError("MyMemory fallback unavailable for this request.")
+
+    response = requests.get(
+        "https://api.mymemory.translated.net/get",
+        params={
+            "q": text,
+            "langpair": f"{source}|{target}",
+        },
+        timeout=15,
     )
-
-    with urlopen(request, timeout=20) as response:
-        data = json.loads(response.read().decode("utf-8"))
+    response.raise_for_status()
+    data = response.json()
 
     if data.get("responseStatus") != 200:
-        message = data.get("responseDetails", "Translation provider error")
-        raise ValueError(message)
+        raise ValueError("MyMemory rejected the request.")
 
-    translated = data.get("responseData", {}).get("translatedText", "")
-    if not translated:
-        raise ValueError("The translation provider returned no text.")
+    result = html.unescape(
+        data.get("responseData", {}).get("translatedText", "")
+    ).strip()
 
-    return html.unescape(translated)
+    if not result:
+        raise ValueError("MyMemory returned an empty translation.")
+
+    return result
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "translation": "MyMemory API"}
+    return {
+        "status": "ok",
+        "translation": "multiple providers configured",
+    }
 
 
 @app.post("/api/translate")
 def translate(payload: TranslateRequest):
     text = payload.text.strip()
+    source = payload.source or "auto"
+    target = payload.target or "en"
 
     if not text:
         raise HTTPException(
             status_code=400,
-            detail="Please enter text to translate."
+            detail="Please enter text to translate.",
         )
-
-    source = (payload.source or "auto").strip()
-    target = (payload.target or "en").strip()
 
     if source == target:
         return {
             "translatedText": text,
             "source": source,
-            "target": target
+            "target": target,
         }
 
-    try:
-        chunks = split_text(text)
-        translated_chunks = [
-            translate_chunk(chunk, source, target)
-            for chunk in chunks
-        ]
+    providers = [
+        ("LibreTranslate", translate_libre),
+        ("Google Translate", translate_google),
+        ("MyMemory", translate_mymemory),
+    ]
 
-        return {
-            "translatedText": " ".join(translated_chunks),
-            "source": source,
-            "target": target
-        }
+    errors = []
 
-    except (HTTPError, URLError, TimeoutError, ValueError, Exception) as exc:
-        logging.exception("MyMemory translation failed")
-        raise HTTPException(
-            status_code=502,
-            detail=(
-                "Translation service unavailable. "
-                "Please try again later or use a shorter message."
-            )
-        ) from exc
+    for name, provider in providers:
+        try:
+            translated = provider(text, source, target)
+            logging.info("Translation succeeded using %s", name)
+
+            return {
+                "translatedText": translated,
+                "source": source,
+                "target": target,
+            }
+        except Exception as exc:
+            logging.warning("%s failed: %s", name, exc)
+            errors.append(name)
+
+    logging.error("All translation providers failed: %s", errors)
+
+    raise HTTPException(
+        status_code=502,
+        detail=(
+            "Translation services are temporarily unavailable. "
+            "Please try again shortly."
+        ),
+    )
 
 
 @app.get("/")
@@ -162,4 +156,8 @@ def index():
     return FileResponse(STATIC_DIR / "index.html")
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=STATIC_DIR),
+    name="static",
+)
