@@ -124,33 +124,59 @@ async function setupLandmarker() {
 
 
 
+
 function genericPose(points) {
-  if (!points || points.length < 21) return "Hand detected";
-
-  const tips = [8, 12, 16, 20];
-  const mids = [6, 10, 14, 18];
-
-  const extended = tips.map((tip, i) =>
-    points[tip].y < points[mids[i]].y
-  );
-
-  const count = extended.filter(Boolean).length;
-  const thumbOpen = Math.abs(points[4].x - points[2].x) > 0.08;
-
-  if (count >= 4 && thumbOpen) {
-    return 'HELLO (open-palm demo gesture)';
+  if (!points || points.length < 21) {
+    return "No hand detected";
   }
 
-  if (count === 0 && !thumbOpen) {
-    return 'YES (closed-fist demo gesture)';
+  // Finger tips and joints (MediaPipe hand landmarks)
+  const indexUp = points[8].y < points[6].y;
+  const middleUp = points[12].y < points[10].y;
+  const ringUp = points[16].y < points[14].y;
+  const pinkyUp = points[20].y < points[18].y;
+
+  // Approximate thumb extension using landmark distances
+  const distance = (a, b) =>
+    Math.hypot(points[a].x - points[b].x, points[a].y - points[b].y);
+
+  const thumbUp =
+    distance(4, 5) > distance(3, 5) * 1.15;
+
+  const fingers = [indexUp, middleUp, ringUp, pinkyUp];
+  const extendedCount = fingers.filter(Boolean).length;
+
+  // All four fingers and thumb extended
+  if (extendedCount === 4 && thumbUp) {
+    return "HELLO";
   }
 
-  if (count === 1 && extended[0]) {
-    return 'NO (one-finger demo gesture)';
+  // Four fingers folded, thumb pointing upward
+  if (
+    extendedCount === 0 &&
+    points[4].y < points[3].y
+  ) {
+    return "THUMBS UP";
   }
 
-  return 'Gesture not recognized';
+  // Index finger extended, remaining fingers folded
+  if (
+    indexUp &&
+    !middleUp &&
+    !ringUp &&
+    !pinkyUp
+  ) {
+    return "ONE";
+  }
+
+  // All fingers folded
+  if (extendedCount === 0 && !thumbUp) {
+    return "FIST";
+  }
+
+  return "Unknown gesture";
 }
+
 
 function drawResults(result){
   const w=video.videoWidth,h=video.videoHeight;if(!w||!h)return;
